@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.conf import settings 
+from django.conf import settings
 from django.views.generic.edit import CreateView, FormView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.urls import reverse_lazy, reverse 
+from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
@@ -14,10 +14,10 @@ from feedback.forms import MissingSignFeedbackForm, SignFeedbackForm
 
 def index(request):
     return render(request, "feedback/index.html",
-        {"language": settings.LANGUAGE_NAME,               
+        {"language": settings.LANGUAGE_NAME,
         "country": settings.COUNTRY_NAME,})
-                    
-                    
+
+
 class GeneralFeedbackCreate(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     '''
     This class implements the general feedback form.
@@ -26,13 +26,13 @@ class GeneralFeedbackCreate(LoginRequiredMixin, SuccessMessageMixin, CreateView)
     fields = ["comment", "video"]
     success_url = reverse_lazy("feedback:generalfeedback")
     success_message = "Thanks for your comment. We value your contribution."
-    
+
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super(GeneralFeedbackCreate, self).form_valid(form)
 
 
-@login_required      
+@login_required
 def missingsign(request):
     if request.method == "POST":
         form = MissingSignFeedbackForm(request.POST, request.FILES)
@@ -41,9 +41,9 @@ def missingsign(request):
             form_to_save.user = request.user
             form_to_save.save()
             success_message = 'Thank you for your feedback. Note that addressing your feedback may take some time depending on the level of requests.'
-            messages.success(request, success_message) 
-            return HttpResponseRedirect(reverse('feedback:missingsign'))  
-    # Any other kind of request goes here     
+            messages.success(request, success_message)
+            return HttpResponseRedirect(reverse('feedback:missingsign'))
+    # Any other kind of request goes here
     else:
         form = MissingSignFeedbackForm()
     return render(request, 'feedback/missingsign_form.html',
@@ -52,45 +52,45 @@ def missingsign(request):
                                 'country': settings.COUNTRY_NAME,
                                 'title':"Report a Missing Sign",
                                 'form': form
-                                })      
-                                            
-@login_required                                                    
+                                })
+
+@login_required
 def wordfeedback(request, keyword, n):
     if request.method == "POST":
         form = SignFeedbackForm(request.POST)
         if form.is_valid():
             # This is the name of the sign.
-            name = '%s-%s'%(keyword, n)                                   
+            name = '%s-%s'%(keyword, n)
             save_signfeedback(request, form, name)
-            messages.success(request, 'Thank you for your comment. We value your contribution') 
-            return HttpResponseRedirect(reverse('feedback:wordfeedback', 
-                kwargs={'keyword': keyword, 'n': n}))                    
+            messages.success(request, 'Thank you for your comment. We value your contribution')
+            return HttpResponseRedirect(reverse('feedback:wordfeedback',
+                kwargs={'keyword': keyword, 'n': n}))
    # Any other kind of request goes here
     else:
         form = SignFeedbackForm()
     return render(request, "feedback/signfeedback_form.html", {"form": form})
 
-@login_required    
+@login_required
 def glossfeedback(request, gloss_number):
     if request.method == "POST":
         form = SignFeedbackForm(request.POST)
         if form.is_valid():
             # This is the name of the gloss.
-            name = '%s'%(gloss_number)                           
+            name = '%s'%(gloss_number)
             save_signfeedback(request, form, name)
-            messages.success(request, 'Thank you for your comment. We value your contribution') 
-            return HttpResponseRedirect(reverse('feedback:glossfeedback', 
-                kwargs={'gloss_number': gloss_number}))                    
+            messages.success(request, 'Thank you for your comment. We value your contribution')
+            return HttpResponseRedirect(reverse('feedback:glossfeedback',
+                kwargs={'gloss_number': gloss_number}))
    # Any other kind of request goes here
     else:
         form = SignFeedbackForm()
     return render(request, "feedback/signfeedback_form.html", {"form": form})
-    
-    
+
+
 def save_signfeedback(request, form, name):
     '''
     Do the work of saving feedback for a sign or gloss.
-    '''                           
+    '''
     form_to_save = form.save(commit=False)
     form_to_save.user= request.user
     form_to_save.name = name
@@ -110,13 +110,13 @@ def showfeedback(request):
          'signfb': signfb
         }
     )
-        
 
-        
+
+
 @permission_required('feedback.delete_generalfeedback')
 def delete(request, kind, id):
     '''
-    Mark a feedback item as deleted. 
+    Mark a feedback item as deleted.
     kind can be either 'sign', 'general' or 'missingsign'.
     '''
     if kind == 'sign':
@@ -126,9 +126,9 @@ def delete(request, kind, id):
     elif kind == 'missingsign':
         kind = MissingSignFeedback
     else:
-        # Django treats this as a 500 error, and 
-        # tries to load 500.html stored in the root 
-        # template directory of the website. 
+        # Django treats this as a 500 error, and
+        # tries to load 500.html stored in the root
+        # template directory of the website.
         raise ValueError()
     feedback_to_delete = get_object_or_404(kind, pk=id)
     # mark as deleted
@@ -140,5 +140,51 @@ def delete(request, kind, id):
     else:
         url = '/'
     return redirect(url)
-                          
-                    
+
+
+
+@login_required
+def interpreterfeedback(request, glossid=None):
+
+    if request.method == "POST":
+
+        if 'action' in request.POST and 'delete_all' in request.POST['action']:
+            gloss = get_object_or_404(Gloss, pk=glossid)
+            fbset = gloss.interpreterfeedback_set.all()
+            fbset.delete()
+        elif 'action' in request.POST and 'delete' in request.POST['action']:
+            fbid = request.POST['id']
+            fb = get_object_or_404(InterpreterFeedback, pk=fbid)
+
+            fb.delete()
+        else:
+            gloss = get_object_or_404(Gloss, pk=glossid)
+
+            form = InterpreterFeedbackForm(request.POST, request.FILES)
+            if form.is_valid():
+
+
+                fb = form.save(commit=False)
+                fb.user = request.user
+                fb.gloss = gloss
+                fb.save()
+
+        # redirect to the gloss page
+        return HttpResponseRedirect(reverse('dictionary:admin_gloss_view', kwargs={'pk': glossid}))
+    else:
+
+        # generate a page listing the feedback from interpreters
+
+        notes = InterpreterFeedback.objects.all()
+
+        general = GeneralFeedback.objects.filter(status='unread', user__groups__name='Interpreter')
+        missing = MissingSignFeedback.objects.filter(status='unread', user__groups__name='Interpreter')
+        signfb = SignFeedback.objects.filter(status='unread', user__groups__name='Interpreter')
+
+        return render_to_response('feedback/interpreter.html',
+                                   {'notes': notes,
+                                    'general': general,
+                                    'missing': missing,
+                                    'signfb': signfb,
+                                   },
+                               context_instance=RequestContext(request))
