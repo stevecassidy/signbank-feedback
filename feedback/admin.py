@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from feedback.models import GeneralFeedback, SignFeedback, MissingSignFeedback
+from feedback.models import GeneralFeedback, SignFeedback, MissingSignFeedback, InterpreterFeedback
 
 
 class GeneralFeedbackAdmin(admin.ModelAdmin):
@@ -21,3 +21,7 @@ class MissingSignFeedbackAdmin(admin.ModelAdmin):
 admin.site.register(MissingSignFeedback, MissingSignFeedbackAdmin)
 
 
+class InterpreterFeedbackAdmin(admin.ModelAdmin):
+    list_display = ['user', 'date']
+    list_filter = ['user']
+admin.site.register(InterpreterFeedback, MissingSignFeedbackAdmin)

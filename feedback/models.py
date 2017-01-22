@@ -1,7 +1,6 @@
-from django.conf import settings 
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
-
 
 STATUS_CHOICES = (('unread', 'unread'),
                    ('read', 'read'),
@@ -11,13 +10,13 @@ STATUS_CHOICES = (('unread', 'unread'),
 
 class GeneralFeedback(models.Model):
     '''
-    This model defines the data which are 
-    associaed with general feedback.  
-    
+    This model defines the data which are
+    associaed with general feedback.
+
     '''
     class Meta:
         ordering = ['-date']
-        
+
     comment = models.TextField()
     video = models.FileField(blank=True) # TODO -- COMMENT_VIDEO_LOCATION
     date = models.DateField(auto_now_add=True)
@@ -31,7 +30,7 @@ handformChoices = (
                     (2, 'Two handed (same shape for each hand)'),
                     (3, 'Two handed (diffent shapes for each hand)')
                     )
-  
+
 handshapeChoices = ((0, 'None'),
                      (291, 'Animal'),
                      (292, 'Animal-flick'),
@@ -93,7 +92,7 @@ handshapeChoices = ((0, 'None'),
                      (348, 'Write'),
                      (349, 'Write-flat')
                      )
-                     
+
 locationChoices = ((0, 'None'),
                     (257, 'Top of head'),
                     (258, 'Forehead'),
@@ -134,7 +133,7 @@ directionChoices = ((0, 'None'),
                      (479, 'Towards'),
                      (480, 'To and fro')
                      )
-                     
+
 movementtypeChoices = ((0, 'None'),
                         (481, 'Straight'),
                         (482, 'Curved'),
@@ -177,19 +176,19 @@ handinteractionChoices = ((0, 'None'),
                        )
 
 
-class MissingSignFeedback(models.Model):   
+class MissingSignFeedback(models.Model):
     '''
-    This model defines the data which 
+    This model defines the data which
     are associated with missing sign feedback.
     '''
     class Meta:
         ordering = ['-date']
-     
+
     user = models.ForeignKey(User)
     date = models.DateTimeField(auto_now_add=True)
     handform = models.IntegerField(choices=handformChoices, blank=True, default=0)
     handshape = models.IntegerField(choices=handshapeChoices, blank=True, default=0)
-    althandshape = models.IntegerField(choices=handshapeChoices, blank=True, default=0)    
+    althandshape = models.IntegerField(choices=handshapeChoices, blank=True, default=0)
     location = models.IntegerField(choices=locationChoices, blank=True, default=0)
     relativelocation = models.IntegerField(choices=relativelocationChoices, blank=True, default=0)
     handbodycontact = models.IntegerField(choices=handbodycontactChoices, blank=True, default=0)
@@ -203,12 +202,12 @@ class MissingSignFeedback(models.Model):
     video = models.FileField(blank=True) # TODO -- COMMENT_VIDEO_LOCATION
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unread')
-    
-    
-    
-        
-isAuslanChoices = ( (1, "yes"), 
-                    (2, "Perhaps"), 
+
+
+
+
+isAuslanChoices = ( (1, "yes"),
+                    (2, "Perhaps"),
                     (3, "Don't know"),
                     (4, "Don't think so"),
                     (5, "No"),
@@ -244,45 +243,45 @@ else:
                         ('n/a', "N/A")
                         )
 
-likedChoices =    ( (1, "yes"), 
-                    (2, "A little"), 
+likedChoices =    ( (1, "yes"),
+                    (2, "A little"),
                     (3, "Don't care"),
                     (4, "Not much"),
                     (5, "No"),
                     (0, "N/A")
                     )
-                                        
-useChoices =      ( (1, "yes"), 
-                    (2, "Sometimes"), 
+
+useChoices =      ( (1, "yes"),
+                    (2, "Sometimes"),
                     (3, "Not Often"),
                     (4, "No"),
-                    (0, "N/A") 
+                    (0, "N/A")
                     )
-                         
-suggestedChoices =( (1, "yes"), 
-                    (2, "Sometimes"), 
+
+suggestedChoices =( (1, "yes"),
+                    (2, "Sometimes"),
                     (3, "Don't Know"),
                     (4, "Perhaps"),
                     (5, "No"),
                     (0, "N/A")
                     )
-                    
-correctChoices =  ( (1, "yes"), 
-                    (2, "Mostly Correct"), 
+
+correctChoices =  ( (1, "yes"),
+                    (2, "Mostly Correct"),
                     (3, "Don't Know"),
                     (4, "Mostly Wrong"),
                     (5, "No"),
-                    (0, "N/A") 
+                    (0, "N/A")
                     )
-                    
+
 class SignFeedback(models.Model):
-    """Store feedback on a particular sign"""    
+    """Store feedback on a particular sign"""
     user = models.ForeignKey(User, editable=False)
     date = models.DateTimeField(auto_now_add=True)
     # This is the name of the sign or gloss that the feedback is about...
-    name = models.TextField()
+    name = models.CharField("Sign Name", max_length=20)
     # the kind can be either 'gloss' or, 'word'.
-    kind = models.TextField()
+    kind = models.CharField("Model Name", max_length=20)
     comment = models.TextField("Please give us your comments about this sign. For example: do you think there are other keywords that belong with this sign? Please write your comments or new keyword/s below.")
     kwnotbelong = models.TextField("Is there a keyword or keyword/s that DO NOT belong with this sign? Please provide the list of keywords below", blank=True)
     isAuslan = models.IntegerField("Is this sign an %s language Sign?" %(settings.LANGUAGE_NAME), choices=isAuslanChoices, default=0, blank=True )
@@ -290,12 +289,25 @@ class SignFeedback(models.Model):
     like = models.IntegerField("Do you like this sign?", choices=likedChoices, default=0, blank=True)
     use = models.IntegerField("Do you use this sign?", choices=useChoices, default=0, blank=True)
     suggested = models.IntegerField("If this sign is a suggested new sign, would you use it?", default=3, choices=suggestedChoices, blank=True)
-    correct = models.IntegerField("Is the information about the sign correct?", choices=correctChoices, default=0, blank=True)    
+    correct = models.IntegerField("Is the information about the sign correct?", choices=correctChoices, default=0, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unread')
-    
+
     def __str__(self):
         return str(self.name) + " by " + str(self.user) + " on " + str(self.date)
 
     class Meta:
         ordering = ['-date']
-    
+
+
+class InterpreterFeedback(models.Model):
+    """Feedback on a sign from an interpreter"""
+
+    class Meta:
+        ordering = ['-date']
+        permissions = (('view_interpreterfeedback', "Can View Interpreter Feedback"),)
+
+    glossid = models.IntegerField('Gloss ID')
+    comment = models.TextField('Note')
+    user = models.ForeignKey(User)
+    date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unread')

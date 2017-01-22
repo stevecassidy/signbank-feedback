@@ -8,8 +8,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from feedback.models import GeneralFeedback, MissingSignFeedback, SignFeedback
-from feedback.forms import MissingSignFeedbackForm, SignFeedbackForm
+from .models import GeneralFeedback, MissingSignFeedback, SignFeedback, InterpreterFeedback
+from .forms import MissingSignFeedbackForm, SignFeedbackForm, InterpreterFeedbackForm
 
 
 def index(request):
@@ -149,24 +149,18 @@ def interpreterfeedback(request, glossid=None):
     if request.method == "POST":
 
         if 'action' in request.POST and 'delete_all' in request.POST['action']:
-            gloss = get_object_or_404(Gloss, pk=glossid)
-            fbset = gloss.interpreterfeedback_set.all()
+            fbset = InterpreterFeedback.objects.filter(glossid=glossid)
             fbset.delete()
         elif 'action' in request.POST and 'delete' in request.POST['action']:
             fbid = request.POST['id']
             fb = get_object_or_404(InterpreterFeedback, pk=fbid)
-
             fb.delete()
         else:
-            gloss = get_object_or_404(Gloss, pk=glossid)
-
             form = InterpreterFeedbackForm(request.POST, request.FILES)
             if form.is_valid():
-
-
                 fb = form.save(commit=False)
                 fb.user = request.user
-                fb.gloss = gloss
+                fb.glossid = glossid
                 fb.save()
 
         # redirect to the gloss page
@@ -181,10 +175,10 @@ def interpreterfeedback(request, glossid=None):
         missing = MissingSignFeedback.objects.filter(status='unread', user__groups__name='Interpreter')
         signfb = SignFeedback.objects.filter(status='unread', user__groups__name='Interpreter')
 
-        return render_to_response('feedback/interpreter.html',
+        return render(request, 'feedback/interpreter.html',
                                    {'notes': notes,
                                     'general': general,
                                     'missing': missing,
                                     'signfb': signfb,
-                                   },
-                               context_instance=RequestContext(request))
+                                   }
+                               )
