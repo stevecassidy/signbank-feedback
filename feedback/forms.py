@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from video.fields import VideoUploadToFLVField
+from video.forms import VideoUploadForm
 
 from .models import *
 # models to represent the feedback from users in the site
@@ -27,7 +27,7 @@ class GeneralFeedbackForm(forms.Form):
     """Form for general feedback"""
 
     comment = forms.CharField(widget=forms.Textarea(attrs={'cols':'64'}), required=False)
-    video = VideoUploadToFLVField(required=False, widget=forms.FileInput(attrs={'size':'60'}))
+#    video = VideoUploadToFLVField(required=False, widget=forms.FileInput(attrs={'size':'60'}))
 
 
 class SignFeedbackForm(forms.ModelForm):
