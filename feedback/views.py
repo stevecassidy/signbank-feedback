@@ -71,16 +71,15 @@ def wordfeedback(request, keyword, n):
     return render(request, "feedback/signfeedback_form.html", {"form": form})
 
 @login_required
-def glossfeedback(request, gloss_number):
+def glossfeedback(request, n):
     if request.method == "POST":
         form = SignFeedbackForm(request.POST)
         if form.is_valid():
             # This is the name of the gloss.
-            name = '%s'%(gloss_number)
+            name = str(n)
             save_signfeedback(request, form, name)
             messages.success(request, 'Thank you for your comment. We value your contribution')
-            return HttpResponseRedirect(reverse('feedback:glossfeedback',
-                kwargs={'gloss_number': gloss_number}))
+            return HttpResponseRedirect(reverse('feedback:glossfeedback', kwargs={'n': n}))
    # Any other kind of request goes here
     else:
         form = SignFeedbackForm()
