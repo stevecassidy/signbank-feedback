@@ -35,13 +35,13 @@ class SignFeedbackForm(forms.ModelForm):
 
     class Meta:
         model = SignFeedback
-        exclude = []
+        exclude = ['name', 'kind', 'user', 'status']
 
 class MissingSignFeedbackForm(forms.ModelForm):
 
     class Meta:
         model = MissingSignFeedback
-        exclude = []
+        exclude = ['user', 'status']
 
 class InterpreterFeedbackForm(forms.ModelForm):
 

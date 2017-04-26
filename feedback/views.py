@@ -37,9 +37,9 @@ def missingsign(request):
     if request.method == "POST":
         form = MissingSignFeedbackForm(request.POST, request.FILES)
         if form.is_valid():
-            form_to_save = form.save(commit=False)
-            form_to_save.user = request.user
-            form_to_save.save()
+            msfeedback = form.save(commit=False)
+            msfeedback.user = request.user
+            msfeedback.save()
             success_message = 'Thank you for your feedback. Note that addressing your feedback may take some time depending on the level of requests.'
             messages.success(request, success_message)
             return HttpResponseRedirect(reverse('feedback:missingsign'))

@@ -1,5 +1,4 @@
-django>=1.9.6
+django==1.10
+django-bootstrap3==8.2.2
 django-model-utils>=2.0
-# Additional requirements go here
-django-bootstrap3
-
+git+https://github.com/signbank/Signbank-video.git@master
