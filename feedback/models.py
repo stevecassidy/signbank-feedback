@@ -306,7 +306,7 @@ class InterpreterFeedback(models.Model):
         ordering = ['-date']
         permissions = (('view_interpreterfeedback', "Can View Interpreter Feedback"),)
 
-    glossid = models.IntegerField('Gloss ID')
+    gloss_id = models.IntegerField('Gloss ID')
     comment = models.TextField('Note')
     user = models.ForeignKey(User)
     date = models.DateTimeField(auto_now_add=True)
