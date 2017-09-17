@@ -33,9 +33,4 @@ class Migration(migrations.Migration):
             field=models.CharField(default='', max_length=20, verbose_name='Sign Name'),
             preserve_default=False,
         ),
-        migrations.RunPython(map_translation),
-        migrations.RemoveField(
-            model_name='signfeedback',
-            name='translation',
-        ),
     ]
