@@ -12,7 +12,6 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('dictionary', '0004_auto_20170905_2213'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -86,7 +85,10 @@ class Migration(migrations.Migration):
                 ('suggested', models.IntegerField(blank=True, choices=[(1, 'yes'), (2, 'Sometimes'), (3, "Don't Know"), (4, 'Perhaps'), (5, 'No'), (0, 'N/A')], default=3, verbose_name='If this sign is a suggested new sign, would you use it?')),
                 ('correct', models.IntegerField(blank=True, choices=[(1, 'yes'), (2, 'Mostly Correct'), (3, "Don't Know"), (4, 'Mostly Wrong'), (5, 'No'), (0, 'N/A')], default=0, verbose_name='Is the information about the sign correct?')),
                 ('status', models.CharField(choices=[('unread', 'unread'), ('read', 'read'), ('deleted', 'deleted')], default='unread', max_length=10)),
-                ('translation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dictionary.Translation')),
+                # this is really a ref to dictionary.Translation but we only need it for
+                # migration from the old version of the db - this migration will be faked in that case
+                # so to be able to test this we just enter a random other model here
+                ('translation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='feedback.GeneralFeedback')),
                 ('user', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
