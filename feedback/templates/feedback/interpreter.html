@@ -2,26 +2,36 @@
 
 {% block content %}
     <h1>Interpreter Feedback Summary</h1>
-    
-    {% if perms.feedback.view_interpreterfeedback %}
-    
-    <p>A list of signs that have at least one Interpreter Note</p>
-    
-    <table>
-      {% regroup notes by gloss as glosses %}
-      
-      {% for gloss in glosses %}
-      <tr>
-        <td><a href="{% url 'dictionary:admin_gloss_view' pk=gloss.grouper.id %}">{{gloss.grouper.idgloss}}</a></td>
-      </tr>
 
-      {% endfor %}      
+    {% if perms.feedback.view_interpreterfeedback %}
+
+    <p>A list of signs that have at least one Interpreter Note</p>
+
+    <table class="table">
+      <thead>
+      <tr><th>User</th><th>Comment</th><th>Link</th></tr>
+      </thead>
+      <tbody>
+      {% for note in notes %}
+      <tr>
+        <td>
+          {{note.user}}
+        </td>
+        <td>
+          {{note.comment}}
+        </td>
+        <td>
+          <a href="{% url 'dictionary:admin_gloss_view' pk=note.gloss_id %}">Go to sign</a>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
     </table>
-    
-    
+
+
 
     <h3>General Feedback</h3>
-  
+
     {% for fb in general %}
       <div class="panel-group" id="general{fb.id}">
         <div class="panel panel-default">
@@ -31,33 +41,33 @@
               <a data-toggle="collapse" data-parent="#signfb{{fb.id}}" href="#gencollapse{{fb.id}}">
                  View
               </a>
-            </h4> 
+            </h4>
           </div>
           <div id="gencollapse{{fb.id}}" class="panel-collapse collapse">
-  
-          {% if fb.video %}  
+
+          {% if fb.video %}
           <div class="videocontainer">
              <video width=400 controls="controls" src='{{ MEDIA_URL }}{{ fb.video }}'></video>
           </div>
           {% endif %}
-      
+
   	    <p>{{fb.comment}}</p>
-     
+
          <p><form action="/feedback/general/delete/{{fb.id}}" method="post">
              {% csrf_token %}
              <input class='delete btn btn-default' type='submit' value='Delete Comment'>
              </form>
            </p>
-         </div> 
+         </div>
         </div>
        </div>
     {% empty %}
     <p>No general feedback posted</p>
-    {% endfor %} 
-  
-    <h3>Sign Feedback</h3> 
-  
-    {% for fb in signfb %} 
+    {% endfor %}
+
+    <h3>Sign Feedback</h3>
+
+    {% for fb in signfb %}
       <div class="panel-group" id="sign{fb.id}">
         <div class="panel panel-default">
           <div class="panel-heading">
@@ -66,41 +76,41 @@
               <a data-toggle="collapse" data-parent="#signfb{{fb.id}}" href="#signcollapse{{fb.id}}">
                  View
               </a>
-            </h4> 
+            </h4>
           </div>
           <div id="signcollapse{{fb.id}}" class="panel-collapse collapse">
-    
+
           <p><strong>Sign:</strong> <a href="{% url 'root_page' %}dictionary/gloss/{{fb.translation.gloss.idgloss}}.html">{{fb.translation.gloss.idgloss}}</a></p>
-    
+
           <p><strong>Comment:</strong> {{fb.comment}}</p>
           <p><strong>Don't Belong:</strong> {{fb.kwnotbelong}}</p>
           <!--
-          <ul>  
+          <ul>
       	<li>Auslan Sign: {{fb.get_isAuslan_display}}</li>
       	<li>Where Used: {{fb.get_whereused_display}}</li>
       	<li>Liked: {{fb.get_like_display}}</li>
       	<li>Used: {{fb.get_use_display}}</li>
       	<li>Use Suggested: {{fb.get_suggested_display}}</li>
       	<li>Correct: {{fb.get_correct_display}}</li>
-        
+
           </ul>
-          -->      
+          -->
           <p><form action="/feedback/sign/delete/{{fb.id}}" method="post">
              {% csrf_token %}
              <input class='delete btn btn-default' type='submit' value='Delete Comment'>
              </form>
-           </p>     
-     
-          </div> 
+           </p>
+
+          </div>
          </div>
        </div>
     {% empty %}
     <p>No feedback posted</p>
     {% endfor %}
-   
-    <h3>Missing Sign Feedback</h3> 
-    {% for fb in missing %} 
-    
+
+    <h3>Missing Sign Feedback</h3>
+    {% for fb in missing %}
+
       <div class="panel-group" id="missing{fb.id}">
         <div class="panel panel-default">
           <div class="panel-heading">
@@ -109,12 +119,12 @@
               <a data-toggle="collapse" data-parent="#missing{{fb.id}}" href="#missingcollapse{{fb.id}}">
                  View
               </a>
-            </h4> 
+            </h4>
           </div>
           <div id="missingcollapse{{fb.id}}" class="panel-collapse collapse">
-    
+
           <p>Email: <a href="mailto:{{fb.user.email}}">{{fb.user.email}}</a></p>
-          {% if fb.video %}  
+          {% if fb.video %}
            <div class="videocontainer">
               <video width=400 controls="controls" src='{{ MEDIA_URL }}{{ fb.video }}'>
               </video>
@@ -122,7 +132,7 @@
                   (if video does not play here you may be able to play by downloading)</p>
            </div>
           {% endif %}
-    
+
            <dl class='dl-horizontal'>
             <dt>Handform</dt><dd>{{fb.get_handform_display}}</dd>
             <dt>Handshape</dt><dd>{{fb.get_handshape_display}}</dd>
@@ -138,28 +148,28 @@
             <dt>Meaning</dt><dd>{{fb.meaning}}</dd>
             <dt>Comments</dt><dd>{{fb.comments}}</dd>
            </dl>
-     
+
            <p><form action="/feedback/missingsign/delete/{{fb.id}}" method="post">
              {% csrf_token %}
              <input class='delete btn btn-default' type='submit' value='Delete Comment'>
              </form>
            </p>
- 
+
         </div>
        </div>
       </div>
 
     {% empty %}
      <p>No feedback posted</p>
-    {% endfor %} 
-    
-    
-    
-    
+    {% endfor %}
+
+
+
+
     {% else %}
-    
+
     <p>You do not have permission to view this page</p>
-    
+
     {% endif %}
 
 

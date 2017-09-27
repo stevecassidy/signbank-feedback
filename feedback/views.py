@@ -159,7 +159,7 @@ def interpreterfeedback(request, glossid=None):
             if form.is_valid():
                 fb = form.save(commit=False)
                 fb.user = request.user
-                fb.glossid = glossid
+                fb.gloss_id = glossid
                 fb.save()
 
         # redirect to the gloss page
