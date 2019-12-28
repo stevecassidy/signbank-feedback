@@ -26,7 +26,6 @@ try:
             "video"
         ],
         SITE_ID=1,
-        MIDDLEWARE_CLASSES=(),
 
         MIDDLEWARE = [
             'django.middleware.security.SecurityMiddleware',
@@ -68,7 +67,7 @@ try:
         SITE_TITLE = "Signbank",
 
         STATIC_URL = '/static/',
-        GLOSS_VIDEO_DIRECTORY = "/tmp/"
+        GLOSS_VIDEO_DIRECTORY = "tmp/"
 
     )
 

@@ -21,7 +21,7 @@ class GeneralFeedback(models.Model):
     video = models.FileField(blank=True) # TODO -- COMMENT_VIDEO_LOCATION
     date = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unread')
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 handformChoices = (
@@ -184,7 +184,7 @@ class MissingSignFeedback(models.Model):
     class Meta:
         ordering = ['-date']
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     handform = models.IntegerField(choices=handformChoices, blank=True, default=0)
     handshape = models.IntegerField(choices=handshapeChoices, blank=True, default=0)
@@ -276,7 +276,7 @@ correctChoices =  ( (1, "yes"),
 
 class SignFeedback(models.Model):
     """Store feedback on a particular sign"""
-    user = models.ForeignKey(User, editable=False)
+    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     # This is the name of the sign or gloss that the feedback is about...
     name = models.CharField("Sign Name", max_length=20)
@@ -304,10 +304,10 @@ class InterpreterFeedback(models.Model):
 
     class Meta:
         ordering = ['-date']
-        permissions = (('view_interpreterfeedback', "Can View Interpreter Feedback"),)
+        #permissions = (('view_interpreterfeedback', "Can View Interpreter Feedback"),)
 
     gloss_id = models.IntegerField('Gloss ID')
     comment = models.TextField('Note')
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unread')

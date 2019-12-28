@@ -3,4 +3,5 @@ wheel==0.29.0
 django==1.11
 django-bootstrap3==9.0.0
 django-model-utils>=2.0
-git+https://github.com/signbank/Signbank-video.git@master
+django-webtest
+git+https://github.com/signbank/signbank-video.git@master

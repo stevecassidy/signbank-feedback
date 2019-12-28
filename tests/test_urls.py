@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.core.urlresolvers import resolve
+from django.urls import resolve
 
 from feedback.views import (index, GeneralFeedbackCreate, 
     missingsign, wordfeedback, glossfeedback, showfeedback)
