@@ -146,9 +146,8 @@ def delete(request, kind, id):
 def interpreterfeedback(request, glossid=None):
 
     if request.method == "POST":
-
         if 'action' in request.POST and 'delete_all' in request.POST['action']:
-            fbset = InterpreterFeedback.objects.filter(glossid=glossid)
+            fbset = InterpreterFeedback.objects.filter(gloss_id=glossid)
             fbset.delete()
         elif 'action' in request.POST and 'delete' in request.POST['action']:
             fbid = request.POST['id']

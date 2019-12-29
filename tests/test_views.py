@@ -6,9 +6,9 @@ from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import AnonymousUser, User, Permission
 from django.http import Http404
 
-from feedback.views import (index, missingsign,
-    GeneralFeedbackCreate, wordfeedback, showfeedback, delete)
-from feedback.models import GeneralFeedback, MissingSignFeedback, SignFeedback
+
+from feedback.views import *
+from feedback.models import GeneralFeedback, MissingSignFeedback, SignFeedback, InterpreterFeedback
 
 
 def create_request(url, method, data=None, permission=None):
@@ -301,6 +301,209 @@ class WordFeedback(TestCase):
         self.assertEqual(feedback[0].name, name)
         # It should have a user
         self.assertEqual(feedback[0].user, request.user)
+
+
+class GlossFeedback(TestCase):
+    def setUp(self):
+        # the url is irrelevant when RequestFactory is used...
+        self.url = '/gloss/123/'
+        self.data = {"comment" : "This is a test comment",
+                    "correct": 0,
+                    "isAuslan": 0,
+                    "kind": 0,
+                    "kwnotbelong": 0,
+                    "like": 0,
+                    "name": 0,
+                    "suggested": 0,
+                    "use": 0,
+        }
+        self.params = [123]
+
+    def test_gloss_feedback_view_renders_right_template(self):
+        '''
+        The word feedback view should render the 'feedback/signfeedback_form.html'
+        template
+        '''
+        request = create_request(self.url, 'get')
+        with self.assertTemplateUsed('feedback/signfeedback_form.html'):
+            response = glossfeedback(request, *self.params)
+
+    def test_gloss_feedback_view_returns_200_response_code_for_a_get_request(self):
+        '''
+        The response code reutrned by the word feedback view
+        should be 200 for a get request.
+        '''
+        request = create_request(self.url, 'get')
+        response = glossfeedback(request, *self.params)
+        self.assertEqual(response.status_code, 200)
+
+    def test_submit_form_without_required_field(self):
+        '''
+        Not submitting required fields should
+        re-render the form.
+        '''
+        request = create_request(self.url, 'post')
+        response = glossfeedback(request, *self.params)
+        with self.assertTemplateUsed('feedback/signfeedback_form.html'):
+            response = glossfeedback(request, *self.params)
+        self.assertEqual(response.status_code, 200)
+
+    def test_gloss_feedback_view_redirects_after_successful_post_request(self):
+        '''
+        The word feedback view should redirect back to itself after
+        the submission of valid feedback.
+        '''
+        request = create_request(self.url, 'post',  self.data)
+        response = glossfeedback(request, *self.params)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.url)
+
+
+    def test_gloss_feedback_view_saves_to_database(self):
+        '''
+        Feedback about a word should be saved to the database if
+        it's valid.
+        '''
+        request = create_request(self.url, 'post',  self.data)
+        response = glossfeedback(request, *self.params)
+        # Now, let's make sure that the feedback is in the database
+        feedback = SignFeedback.objects.all()
+        # There should be one feedback in the datbase
+        self.assertEqual(1, len(feedback))
+        self.assertEqual(feedback[0].comment, self.data['comment'])
+        # It should have a name
+        name = '%s'%(self.params[0])
+        self.assertEqual(feedback[0].name, name)
+        # It should have a user
+        self.assertEqual(feedback[0].user, request.user)
+
+
+class InterpreterFeedbackTest(TestCase):
+    def setUp(self):
+        # the url is irrelevant when RequestFactory is used...
+        self.url = '/interpreter/123/'
+        self.redirecturl = '/dictionary/gloss/123'
+        self.data = {
+            "comment" : "This is a test comment",
+        }
+        self.params = [123]
+
+    def test_interpreter_feedback_view_renders_right_template(self):
+        '''
+        The word feedback view should render the 'feedback/interpreter.html'
+        template
+        '''
+        request = create_request(self.url, 'get')
+        with self.assertTemplateUsed('feedback/interpreter.html'):
+            response = interpreterfeedback(request, *self.params)
+
+    def test_interpreter_feedback_view_returns_200_response_code_for_a_get_request(self):
+        '''
+        The response code reutrned by the word feedback view
+        should be 200 for a get request.
+        '''
+        request = create_request(self.url, 'get')
+        response = interpreterfeedback(request, *self.params)
+        self.assertEqual(response.status_code, 200)
+
+    def test_submit_form_without_required_field(self):
+        '''
+        Not submitting required fields should
+        redirect to the dictionary gloss page
+        '''
+        request = create_request(self.url, 'post')
+        response = interpreterfeedback(request, *self.params)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.redirecturl)
+
+    def test_interpreter_feedback_view_redirects_after_successful_post_request(self):
+        '''
+        The word feedback view should redirect back to itself after
+        the submission of valid feedback.
+        '''
+        request = create_request(self.url, 'post',  self.data)
+        response = interpreterfeedback(request, *self.params)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.redirecturl)
+
+
+    def test_interpreter_feedback_view_saves_to_database(self):
+        '''
+        Feedback comment should be saved to the database if
+        it's valid.
+        '''
+        request = create_request(self.url, 'post',  self.data)
+        response = interpreterfeedback(request, *self.params)
+        # Now, let's make sure that the feedback is in the database
+        feedback = InterpreterFeedback.objects.all()
+        # There should be one feedback in the datbase
+        self.assertEqual(1, len(feedback))
+        self.assertEqual(feedback[0].comment, self.data['comment'])
+        # It should have a user
+        self.assertEqual(feedback[0].user, request.user)
+
+    def test_interpreter_feedback_delete_bad_id(self):
+        '''
+        action set to delete one feedback comment but feedback id not found
+        gives a 404 response
+        '''
+        data = {
+            'action': 'delete',
+            'id': 1
+        }
+        request = create_request(self.url, 'post', data)
+        with self.assertRaises(Http404):
+            response = interpreterfeedback(request, *self.params)
+
+
+    def test_interpreter_feedback_delete(self):
+        '''
+        action set to delete one feedback comment
+        '''
+        # add some feedback to delete
+        user = User(first_name='sample', last_name='user')
+        user.save()
+        fb1 = InterpreterFeedback(comment='hello', gloss_id=123, user_id=user.pk)
+        fb1.save()
+        fb2 = InterpreterFeedback(comment='world', gloss_id=123, user_id=user.pk)
+        fb2.save()        
+        fbid = fb1.pk
+        fb2id = fb2.pk
+        data = {
+            'action': 'delete',
+            'id': fbid
+        }
+        request = create_request(self.url, 'post',  data)
+        response = interpreterfeedback(request, *self.params)
+        # Now, let's make sure that the feedback has been removed
+        feedback = InterpreterFeedback.objects.filter(id=fbid)
+        self.assertEqual(0, feedback.count())
+        # and the other one is still there
+        feedback = InterpreterFeedback.objects.filter(id=fb2id)
+        self.assertEqual(1, feedback.count())
+
+    def test_interpreter_feedback_delete_all(self):
+        '''
+        action set to delete all feedback comments
+        '''
+        # add some feedback to delete
+        user = User(first_name='sample', last_name='user')
+        user.save()
+        fb1 = InterpreterFeedback(comment='hello', gloss_id=123, user_id=user.pk)
+        fb1.save()
+        fb2 = InterpreterFeedback(comment='world', gloss_id=123, user_id=user.pk)
+        fb2.save() 
+        data = {
+            'action': 'delete_all',
+        }
+        request = create_request(self.url, 'post',  data)
+        response = interpreterfeedback(request, *self.params)
+        # Now, let's make sure that the feedback is in the database
+        feedback = InterpreterFeedback.objects.all()
+        self.assertEqual(0, feedback.count())
+        
+
+
 
 
 class ShowFeedbackView(TestCase):

@@ -40,11 +40,11 @@ try:
 
        TEMPLATES = [
           {
-          'BACKEND': 'django.template.backends.django.DjangoTemplates',
-                  'DIRS': [os.path.join((os.path.dirname(os.path.abspath(__file__))),
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [os.path.join((os.path.dirname(os.path.abspath(__file__))),
                             'tests', 'templates'),
-            # insert your TEMPLATE_DIRS here
-],
+                        # insert your TEMPLATE_DIRS here
+                    ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
